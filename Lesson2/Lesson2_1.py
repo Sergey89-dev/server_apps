@@ -12,46 +12,49 @@
 #Проверить работу программы через вызов функции write_to_csv().
 import re
 import csv
-
-def get_data(us_l):
-	main_data = [['Изготовитель системы', 'Название ОС', 'Код продукта', 'Тип системы']]
+import chardet
+def get_data():
+#Создадим списки
 	os_prod_list = []
 	os_name_list = []
 	os_code_list = []
 	os_type_list = []
+	main_data = []
+#Проверим файл 
+	for i in range(1, 4):
+		with open(f'info_{1}.txt', 'rb') as file_obj:
+			data_byt = file_obj.read()
+			result = chardet.detect(data_byt)
+			data = data_byt.decode(result['encoding'])
+#Заполним списки
+		os_prod_reg = re.compile(r'Изготовитель системы:\s*\S*')
+		os_prod_list.append(os_prod_reg.findall(data)[0].split()[2])
+		os_name_reg = re.compile(r'Windows:\s*\S*')
+		os_name_list.append(os_name_reg.findall(data)[0])
+		os_code_reg = re.compile(r'Код продукта:\s*\S*')
+		os_code_list.append(os_code_reg.findall(data)[0].split()[2])
+		os_type_reg = re.compile(r'Тип системы:\s*\S*')
+		os_type_list.append(os_type_reg.findall(data)[0].split()[2])
 
-	for data_r in us_l:
-		file_dat = open(data_r)
-		for row in file_dat:
-			row = row.rstrip()
-			if re.match('Изготовитель системы', row):
-				os_prod_list.append(re.search(r'(Изготовитель системы).\s*(.*)', row).group(2))
-			elif re.match('Название ОС', row):
-				os_name_list.append(re.search(r'(Название ОС).\s*(.*)', row).group(2))
-			elif  re.match('Код продукта', row):
-				os_code_list.append(re.search(r'(Код продукта).\s*(.*)', row).group(2))
-			elif  re.match('Тип системы', row):
-				os_type_list.append(re.search(r'(Тип системы).\s*(.*)', row).group(2))
+	headers = ['Изготовитель системы', 'Название ОС', 'Код продукта', 'Тип системы']
+	main_data.append(headers)
 
-	for i in range(len(us_l)):
-		main_data.append([
-			os_prod_list[i],
-			os_name_list[i],
-			os_code_list[i],
-			os_type_list[i]
-			])
+	data_for_rows = [os_prod_list, os_name_list, os_code_list, os_type_list]
+
+#Скорректируем вид данных в матрицу
+
+	for idx in range(len(data_for_rows[0])):
+		line = [row[idx] for row in data_for_rows]
+		main_data.append(line)
 
 	return main_data
+#Функция, записываюзщая csv файл
+def write_to_csv(out_file):
+	main_data = get_data()
+	with open(out_file, 'w', encoding='utf-8') as file:
+		writer = csv.writer(file)
+		for row in main_data:
+			writer.writerow(row)
 
-def csv_write(file, words):
-	with open(file, 'w') as f_n:
-		f_n_data = csv.writer(f_n)
-		for a in words:
-			f_n_data.writerow(a)
 
-
-test = get_data(['info_1.txt', 'info_2.txt', 'info_3.txt'])
-csv_write('my_test.csv', test)
-
-with open('my_test.csv', 'r') as f_n:
-	print(f_n.read())
+write_to_csv('my_test.csv')
