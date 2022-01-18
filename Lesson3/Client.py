@@ -3,9 +3,8 @@ import socket
 import time
 import json
 import sys
-from variables import ACTION, USER, PRESENCE, DEFAULT_PORT, RESPONSE, TIME, ACCOUNT_NAME, DEFAULT_IP_ADDRESS, ENCODING
-from utils import get_message
-from utils import send_message
+from variables import ACTION, USER, PRESENCE, DEFAULT_PORT, RESPONSE, TIME, ACCOUNT_NAME, DEFAULT_IP_ADDRESS, ENCODING, ERROR
+from utils import get_message, send_message
 def create_presence(account_name = 'Guest'):
 	out = {
 		ACTION: PRESENCE,
